@@ -1,0 +1,5 @@
+---
+- version: v1alpha1
+  group: mariadb.com
+  kind: MariaDB
+  role: /opt/ansible/roles/mariadb
