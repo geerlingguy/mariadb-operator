@@ -3,5 +3,5 @@ kind: MariaDB
 metadata:
   name: example-mariadb
 spec:
-  # Add fields here
-  size: 3
+  masters: 1
+  replicas: 0
