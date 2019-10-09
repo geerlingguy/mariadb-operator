@@ -5,3 +5,6 @@ metadata:
 spec:
   masters: 1
   replicas: 0
+  mariadb_password: TODO
+  mariadb_image: mariadb:10.4
+  mariadb_pvc_storage_request: 1Gi

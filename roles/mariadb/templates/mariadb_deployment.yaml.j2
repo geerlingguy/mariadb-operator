@@ -1,0 +1,52 @@
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: '{{ meta.name }}'
+  namespace: '{{ meta.namespace }}'
+  labels:
+    app: mariadb
+    managed-by: ansible
+spec:
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: mariadb
+        managed-by: ansible
+        tier: database
+    spec:
+      containers:
+        - image: '{{ mariadb_image }}'
+          name: mariadb
+          env:
+            - name: MYSQL_DATABASE
+              value: db
+            - name: MYSQL_USER
+              value: db_user
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: '{{ meta.name }}-pass'
+                  key: password
+            - name: MYSQL_RANDOM_ROOT_PASSWORD
+              value: 'true'
+          # resources:
+          #   limits:
+          #     cpu: "2"
+          #     memory: 2048Mi
+          #   requests:
+          #     cpu: "500m"
+          #     memory: 512Mi
+          ports:
+            - containerPort: 3306
+              name: mariadb
+          volumeMounts:
+            - name: mariadb
+              mountPath: /var/lib/mysql
+              subPath: mysql
+      volumes:
+        - name: mariadb
+          persistentVolumeClaim:
+            claimName: '{{ meta.name }}-claim'
