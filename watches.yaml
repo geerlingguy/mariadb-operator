@@ -1,5 +1,5 @@
 ---
 - version: v1alpha1
-  group: mariadb.com
+  group: mariadb.mariadb.com
   kind: MariaDB
-  role: /opt/ansible/roles/mariadb
+  playbook: /opt/ansible/main.yml

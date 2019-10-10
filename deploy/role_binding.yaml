@@ -5,7 +5,8 @@ metadata:
 subjects:
 - kind: ServiceAccount
   name: mariadb-operator
+  namespace: default
 roleRef:
-  kind: Role
+  kind: ClusterRole
   name: mariadb-operator
   apiGroup: rbac.authorization.k8s.io

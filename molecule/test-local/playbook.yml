@@ -3,7 +3,7 @@
 - name: Build Operator in Kubernetes docker container
   hosts: k8s
   vars:
-    image_name: mariadb.com/mariadb-operator:testing
+    image_name: mariadb.mariadb.com/mariadb-operator:testing
   tasks:
   # using command so we don't need to install any dependencies
   - name: Get existing image hash
@@ -23,14 +23,14 @@
     ansible_python_interpreter: '{{ ansible_playbook_python }}'
     deploy_dir: "{{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') }}/deploy"
     pull_policy: Never
-    REPLACE_IMAGE: mariadb.com/mariadb-operator:testing
+    operator_image: mariadb.mariadb.com/mariadb-operator:testing
     custom_resource: "{{ lookup('file', '/'.join([deploy_dir, 'crds/mariadb_v1alpha1_mariadb_cr.yaml'])) | from_yaml }}"
   tasks:
   - block:
     - name: Delete the Operator Deployment
       k8s:
         state: absent
-        namespace: '{{ namespace }}'
+        namespace: '{{ operator_namespace }}'
         definition: "{{ lookup('template', '/'.join([deploy_dir, 'operator.yaml'])) }}"
       register: delete_deployment
       when: hostvars[groups.k8s.0].build_cmd.changed
@@ -39,7 +39,7 @@
       k8s_facts:
         api_version: '{{ definition.apiVersion }}'
         kind: '{{ definition.kind }}'
-        namespace: '{{ namespace }}'
+        namespace: '{{ operator_namespace }}'
         name: '{{ definition.metadata.name }}'
       vars:
         definition: "{{ lookup('template', '/'.join([deploy_dir, 'operator.yaml'])) | from_yaml }}"
@@ -51,26 +51,33 @@
 
     - name: Create the Operator Deployment
       k8s:
-        namespace: '{{ namespace }}'
+        namespace: '{{ operator_namespace }}'
         definition: "{{ lookup('template', '/'.join([deploy_dir, 'operator.yaml'])) }}"
 
-    - name: Create the mariadb.com/v1alpha1.MariaDB
+    - name: Ensure the MariaDB custom_resource namespace exists
       k8s:
         state: present
-        namespace: '{{ namespace }}'
+        name: '{{ custom_resource.metadata.namespace }}'
+        kind: Namespace
+        api_version: v1
+
+    - name: Create the mariadb.mariadb.com/v1alpha1.MariaDB
+      k8s:
+        state: present
+        namespace: '{{ custom_resource.metadata.namespace }}'
         definition: '{{ custom_resource }}'
 
-    - name: Wait 60s for reconciliation to run
+    - name: Wait 5m for reconciliation to run
       k8s_facts:
         api_version: '{{ custom_resource.apiVersion }}'
         kind: '{{ custom_resource.kind }}'
-        namespace: '{{ namespace }}'
+        namespace: '{{ custom_resource.metadata.namespace }}'
         name: '{{ custom_resource.metadata.name }}'
       register: cr
       until:
       - "'Successful' in (cr | json_query('resources[].status.conditions[].reason'))"
       delay: 6
-      retries: 10
+      retries: 50
     rescue:
     - name: debug cr
       ignore_errors: yes
@@ -81,11 +88,11 @@
         debug_cr: '{{ lookup("k8s",
           kind=custom_resource.kind,
           api_version=custom_resource.apiVersion,
-          namespace=namespace,
+          namespace=custom_resource.metadata.namespace,
           resource_name=custom_resource.metadata.name
         )}}'
 
-    - name: debug memcached lookup
+    - name: debug mariadb deployment
       ignore_errors: yes
       failed_when: false
       debug:
@@ -94,14 +101,14 @@
         deploy: '{{ lookup("k8s",
           kind="Deployment",
           api_version="apps/v1",
-          namespace=namespace,
-          label_selector="app=memcached"
+          namespace=custom_resource.metadata.namespace,
+          label_selector="app=mariadb"
         )}}'
 
     - name: get operator logs
       ignore_errors: yes
       failed_when: false
-      command: kubectl logs deployment/{{ definition.metadata.name }} -n {{ namespace }}
+      command: kubectl logs deployment/{{ definition.metadata.name }} -n {{ operator_namespace }} -c operator
       environment:
         KUBECONFIG: '{{ lookup("env", "KUBECONFIG") }}'
       vars:

@@ -1,7 +1,8 @@
-apiVersion: mariadb.com/v1alpha1
+apiVersion: mariadb.mariadb.com/v1alpha1
 kind: MariaDB
 metadata:
   name: example-mariadb
+  namespace: example-mariadb
 spec:
   masters: 1
   replicas: 0
