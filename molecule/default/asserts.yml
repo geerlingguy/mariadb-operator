@@ -41,9 +41,11 @@
     mariadb_db_password: TODO
 
   pre_tasks:
-    - name: Ensure pip is available.
+    - name: Ensure required dependencies are available.
       apk:
-        name: py-pip
+        name:
+          - py-pip
+          - mysql-client
         state: present
 
     - name: Ensure PyMySQL is available.
