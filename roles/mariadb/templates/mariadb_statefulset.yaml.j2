@@ -1,21 +1,23 @@
 ---
-apiVersion: extensions/v1beta1
-kind: Deployment
+apiVersion: v1
+kind: StatefulSet
 metadata:
   name: '{{ meta.name }}'
   namespace: '{{ meta.namespace }}'
   labels:
     app: mariadb
-    managed-by: ansible
 spec:
-  strategy:
-    type: Recreate
+  selector:
+    matchLabels:
+      app: mariadb
+  serviceName: '{{ meta.name }}'
+  replicas: 1
+  updateStrategy:
+    type: RollingUpdate
   template:
     metadata:
       labels:
         app: mariadb
-        managed-by: ansible
-        tier: database
     spec:
       containers:
         - image: '{{ mariadb_image }}'
@@ -46,7 +48,12 @@ spec:
             - name: mariadb
               mountPath: /var/lib/mysql
               subPath: mysql
-      volumes:
-        - name: mariadb
-          persistentVolumeClaim:
-            claimName: '{{ meta.name }}-claim'
+  volumeClaimTemplates:
+    - metadata:
+        name: mariadb
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: '{{ mariadb_pvc_storage_request }}'

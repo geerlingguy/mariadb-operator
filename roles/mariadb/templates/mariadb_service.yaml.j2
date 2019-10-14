@@ -6,10 +6,9 @@ metadata:
   namespace: '{{ meta.namespace }}'
   labels:
     app: mariadb
-    managed-by: ansible
 spec:
   ports:
     - port: 3306
+  clusterIP: None
   selector:
     app: mariadb
-    tier: database

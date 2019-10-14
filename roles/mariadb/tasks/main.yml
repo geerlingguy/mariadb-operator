@@ -4,6 +4,5 @@
     definition: "{{ lookup('template', item) | from_yaml }}"
   with_items:
     - mariadb_secret.yaml.j2
-    - mariadb_pvc.yaml.j2
-    - mariadb_deployment.yaml.j2
+    - mariadb_statefulset.yaml.j2
     - mariadb_service.yaml.j2

@@ -5,6 +5,10 @@
 
   vars:
     ansible_python_interpreter: '{{ ansible_playbook_python }}'
+    mariadb_db_host: example-mariadb-0.example-mariadb.example-mariadb.svc.cluster.local
+    mariadb_db_name: db
+    mariadb_db_username: db_user
+    mariadb_db_password: CHANGEME
 
   tasks:
     - name: Get mariadb Pod data
@@ -19,46 +23,24 @@
       assert:
         that: '{{ (mariadb_pods.resources | length) == 1 }}'
 
-    - name: Get mariadb Service data
-      k8s_facts:
-        kind: Service
-        namespace: example-mariadb
-        label_selectors:
-          - app=mariadb
-      register: mariadb_services
-
-    - name: Set variable with mariadb service clusterIP
-      set_fact:
-        mariadb_service_ip: "{{ mariadb_services.resources[0].spec.clusterIP }}"
-
 - name: Verify database functionality
   hosts: k8s
 
   vars:
-    mariadb_db_host: "{{ hostvars['localhost']['mariadb_service_ip'] }}"
+    mariadb_db_host: example-mariadb-0.example-mariadb.example-mariadb.svc.cluster.local
     mariadb_db_name: db
     mariadb_db_username: db_user
-    mariadb_db_password: TODO
-
-  pre_tasks:
-    - name: Ensure required dependencies are available.
-      apk:
-        name:
-          - py-pip
-          - mysql-client
-        state: present
-
-    - name: Ensure PyMySQL is available.
-      pip:
-        name: PyMySQL
-        state: present
+    mariadb_db_password: CHANGEME
 
   tasks:
-    - name: Test database connection to mariadb Pod
-      mysql_db:
-        state: dump
-        name: '{{ mariadb_db_name }}'
-        target: '/tmp/{{ mariadb_db_name }}.sql'
-        login_host: '{{ mariadb_db_host }}'
-        login_user: '{{ mariadb_db_username }}'
-        login_password: '{{ mariadb_db_password }}'
+    - name: Create a table in the test database.
+      command: >
+        kubectl -n example-mariadb run -it --rm mysql-client --image=arey/mysql-client --restart=Never --
+        -h {{ mariadb_db_host }} -u {{ mariadb_db_username }} -p{{ mariadb_db_password }} -D {{ mariadb_db_name }}
+        -e "CREATE TABLE IF NOT EXISTS test (title VARCHAR(255));"
+
+    - name: Verify the table exists.
+      command: >
+        kubectl -n example-mariadb run -it --rm mysql-client --image=arey/mysql-client --restart=Never --
+        -h {{ mariadb_db_host }} -u {{ mariadb_db_username }} -p{{ mariadb_db_password }} -D {{ mariadb_db_name }}
+        -e "SELECT 1 FROM test LIMIT 1;"
