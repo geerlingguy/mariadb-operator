@@ -5,10 +5,6 @@
 
   vars:
     ansible_python_interpreter: '{{ ansible_playbook_python }}'
-    mariadb_db_host: example-mariadb-0.example-mariadb.example-mariadb.svc.cluster.local
-    mariadb_db_name: db
-    mariadb_db_username: db_user
-    mariadb_db_password: CHANGEME
 
   tasks:
     - name: Get mariadb Pod data
