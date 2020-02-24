@@ -105,14 +105,14 @@ spec:
             - /usr/local/bin/ao-logs
             - /tmp/ansible-operator/runner
             - stdout
-          image: "geerlingguy/mariadb-operator:0.0.1"
+          image: "geerlingguy/mariadb-operator:0.0.2"
           imagePullPolicy: "Always"
           volumeMounts:
             - mountPath: /tmp/ansible-operator/runner
               name: runner
               readOnly: true
         - name: operator
-          image: "geerlingguy/mariadb-operator:0.0.1"
+          image: "geerlingguy/mariadb-operator:0.0.2"
           imagePullPolicy: "Always"
           volumeMounts:
             - mountPath: /tmp/ansible-operator/runner
