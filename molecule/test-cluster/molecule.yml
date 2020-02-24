@@ -6,13 +6,14 @@ driver:
   options:
     managed: False
     ansible_connection_options: {}
-lint:
-  name: yamllint
-  enabled: False
+lint: |
+  set -e
+  yamllint .
+  ansible-lint
 platforms:
-- name: test-cluster
-  groups:
-  - k8s
+  - name: test-cluster
+    groups:
+      - k8s
 provisioner:
   name: ansible
   inventory:
@@ -25,7 +26,6 @@ provisioner:
   env:
     ANSIBLE_ROLES_PATH: ${MOLECULE_PROJECT_DIRECTORY}/roles
 scenario:
-  name: test-cluster
   test_sequence:
     - lint
     - destroy
@@ -37,7 +37,3 @@ scenario:
     - side_effect
     - verify
     - destroy
-verifier:
-  name: testinfra
-  lint:
-    name: flake8

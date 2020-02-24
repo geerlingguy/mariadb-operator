@@ -1,3 +1,4 @@
+---
 apiVersion: mariadb.mariadb.com/v1alpha1
 kind: MariaDB
 metadata:

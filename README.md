@@ -92,7 +92,6 @@ Run the following command inside this directory:
 
 Then push the generated image to Docker Hub:
 
-    docker login -u geerlingguy
     docker push geerlingguy/mariadb-operator:0.0.1
 
 #### Build a new version of the `mariadb-operator.yaml` file

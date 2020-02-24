@@ -22,7 +22,7 @@
       blockinfile:
         path: "{{ operator_file_path }}"
         block: "{{ item }}"
-        marker: "---"
+        marker: ""
         marker_begin: ""
         marker_end: ""
         insertafter: "EOF"
@@ -32,6 +32,11 @@
         - "../deploy/role_binding.yaml"
         - "../deploy/service_account.yaml"
         - "../deploy/operator.yaml"
+
+    - name: Remove space at beginning of mariadb-operator.yml
+      shell: >
+        echo "$(tail -n +2 {{ operator_file_path }})" > {{ operator_file_path }}
+      changed_when: true
 
     - name: Template the mariadb-operator.yaml file into mariadb-operator.yml
       template:

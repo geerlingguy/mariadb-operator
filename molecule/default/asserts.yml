@@ -29,14 +29,20 @@
     mariadb_db_password: CHANGEME
 
   tasks:
+    - name: Wait 60s for database to initialize.
+      pause:
+        seconds: 60
+
     - name: Create a table in the test database.
       command: >
         kubectl -n example-mariadb run -it --rm mysql-client --image=arey/mysql-client --restart=Never --
         -h {{ mariadb_db_host }} -u {{ mariadb_db_username }} -p{{ mariadb_db_password }} -D {{ mariadb_db_name }}
         -e "CREATE TABLE IF NOT EXISTS test (title VARCHAR(255));"
+      changed_when: true
 
     - name: Verify the table exists.
       command: >
         kubectl -n example-mariadb run -it --rm mysql-client --image=arey/mysql-client --restart=Never --
         -h {{ mariadb_db_host }} -u {{ mariadb_db_username }} -p{{ mariadb_db_password }} -D {{ mariadb_db_name }}
         -e "SELECT 1 FROM test LIMIT 1;"
+      changed_when: false
