@@ -88,11 +88,11 @@ Each of these must be appropriately built in preparation for a new tag:
 
 Run the following command inside this directory:
 
-    operator-sdk build geerlingguy/mariadb-operator:0.0.2
+    operator-sdk build geerlingguy/mariadb-operator:0.0.3
 
 Then push the generated image to Docker Hub:
 
-    docker push geerlingguy/mariadb-operator:0.0.2
+    docker push geerlingguy/mariadb-operator:0.0.3
 
 #### Build a new version of the `mariadb-operator.yaml` file
 
@@ -102,7 +102,8 @@ Verify the `build/chain-operator-files.yml` playbook has the most recent version
 
 After it is built, test it on a local cluster:
 
-    minikube start --memory 6g --cpus 4
+    minikube start
+    minikube addons enable ingress
     kubectl apply -f deploy/mariadb-operator.yaml
     kubectl create namespace example-mariadb
     kubectl apply -f deploy/crds/mariadb_v1alpha1_mariadb_cr.yaml
