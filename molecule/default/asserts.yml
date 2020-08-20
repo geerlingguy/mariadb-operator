@@ -8,7 +8,7 @@
 
   tasks:
     - name: Get mariadb Pod data
-      k8s_facts:
+      k8s_info:
         kind: Pod
         namespace: example-mariadb
         label_selectors:
