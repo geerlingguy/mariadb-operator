@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.com/geerlingguy/mariadb-operator.svg?branch=master)](https://travis-ci.com/geerlingguy/mariadb-operator)
 
-This is a MariaDB Operator, which makes management of MariaDB instances (or clusters) running inside Kuberenetes clusters easy. It was built with the [Operator SDK](https://github.com/operator-framework/operator-sdk) using [Ansible](https://www.ansible.com/blog/ansible-operator).
+This is a MariaDB Operator, which makes management of MariaDB instances (or clusters) running inside Kubernetes clusters easy. It was built with the [Operator SDK](https://github.com/operator-framework/operator-sdk) using [Ansible](https://www.ansible.com/blog/ansible-operator).
 
 ## Usage
 
